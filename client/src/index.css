@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import "tailwindcss/theme" ;
+@import "tailwindcss/utilities";
+
+@layer base {
+  * {
+    border-color: rgb(229 231 235);
+  }
+  body {
+    background-color: rgb(249 250 251);
+    color: rgb(17 24 39);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgb(240 253 244);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(134 239 172);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(74 222 128);
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Animation utilities */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom gradients */
+.gradient-green {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.gradient-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
