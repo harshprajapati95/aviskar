@@ -1,22 +1,266 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CreditCard, TrendingUp, CheckCircle, DollarSign, Award } from 'lucide-react';
-import { assets, aiHelpers } from '../assets';
+import { CreditCard, TrendingUp, CheckCircle, DollarSign, Award, Calculator, User, IndianRupee } from 'lucide-react';
 
 const LoanRecommendations = () => {
+  const [formData, setFormData] = useState({
+    farmSize: '',
+    cropType: '',
+    lastYearIncome: '',
+    totalExpenses: '',
+    pastLoans: '',
+    experience: '',
+    irrigationType: 'rainfed',
+    landOwnership: 'owned',
+    householdExpenses: '',
+    loanAmount: '',
+    previousDefaults: 'no'
+  });
+  const [creditScore, setCreditScore] = useState(null);
   const [recommendations, setRecommendations] = useState(null);
 
-  const getLoanRecommendations = () => {
-    const recs = aiHelpers.recommendLoans(assets.farmProfile, assets.loans.creditScore);
-    setRecommendations(recs);
+  const calculateCreditScore = () => {
+    const {
+      farmSize, cropType, lastYearIncome, totalExpenses, pastLoans,
+      experience, irrigationType, landOwnership, householdExpenses,
+      loanAmount, previousDefaults
+    } = formData;
+    
+    // Convert strings to numbers
+    const income = parseFloat(lastYearIncome) || 0;
+    const expenses = parseFloat(totalExpenses) || 0;
+    const size = parseFloat(farmSize) || 0;
+    const loans = parseInt(pastLoans) || 0;
+    const exp = parseInt(experience) || 0;
+    const householdExp = parseFloat(householdExpenses) || 0;
+    const reqAmount = parseFloat(loanAmount) || 0;
+    const defaults = previousDefaults === 'yes' ? 1 : 0;
+    
+    // Calculate profit margin
+    const profit = income - expenses - householdExp;
+    const profitMargin = income > 0 ? (profit / income) * 100 : 0;
+    
+    // Enhanced scoring formula with multiple factors
+    let score = 400; // Base score
+    
+    // Income factor (25%)
+    score += (income / 10000) * 0.25;
+    
+    // Farm size factor (15%)
+    score += (size * 5);
+    
+    // Profit margin factor (20%)
+    score += (profitMargin * 2);
+    
+    // Experience factor (10%)
+    score += (exp * 2);
+    
+    // Expense ratio factor (15%)
+    const expenseRatio = income > 0 ? (expenses / income) * 100 : 100;
+    score -= (expenseRatio - 50); // Penalty if expenses > 50% of income
+    
+    // Crop type bonus
+    const cropBonus = {
+      'rice': 10, 'wheat': 10, 'cotton': 15, 'sugarcane': 20,
+      'maize': 8, 'vegetables': 12, 'fruits': 18, 'pulses': 10, 'oilseeds': 12
+    };
+    score += cropBonus[cropType] || 0;
+    
+    // Irrigation bonus
+    const irrigationBonus = {
+      'rainfed': 0, 'canal': 15, 'borewell': 10, 'drip': 25, 'sprinkler': 20
+    };
+    score += irrigationBonus[irrigationType] || 0;
+    
+    // Land ownership bonus
+    const ownershipBonus = {
+      'owned': 20, 'leased': 0, 'mixed': 10
+    };
+    score += ownershipBonus[landOwnership] || 0;
+    
+    // Past loans penalty
+    score -= (loans * 8);
+    
+    // Default penalty
+    score -= (defaults * 120);
+    
+    // Loan to income ratio check
+    if (income > 0 && reqAmount > 0) {
+      const loanToIncomeRatio = (reqAmount / income) * 100;
+      if (loanToIncomeRatio > 200) score -= 50; // High risk
+      else if (loanToIncomeRatio > 100) score -= 25; // Medium risk
+    }
+    
+    // Normalize score to 300-850 range
+    score = Math.max(300, Math.min(850, score));
+    
+    setCreditScore(Math.round(score));
+    generateRecommendations(Math.round(score), formData);
+  };
+
+  const getCreditRating = (score) => {
+    if (score >= 700) return { rating: 'Excellent', color: 'text-green-600', bg: 'bg-green-100' };
+    if (score >= 600) return { rating: 'Good', color: 'text-blue-600', bg: 'bg-blue-100' };
+    if (score >= 500) return { rating: 'Average', color: 'text-yellow-600', bg: 'bg-yellow-100' };
+    return { rating: 'Low', color: 'text-red-600', bg: 'bg-red-100' };
+  };
+
+  const generateRecommendations = (score, data) => {
+    const reqAmount = parseFloat(data.loanAmount) || 0;
+    const income = parseFloat(data.lastYearIncome) || 0;
+    const farmSize = parseFloat(data.farmSize) || 0;
+    
+    let loans = [];
+    let tips = [];
+    let emi = 0;
+    let eligibilityReasons = [];
+
+    if (score >= 700) {
+      // Excellent credit - all loan types available
+      loans = [
+        {
+          name: 'Kisan Credit Card (KCC)',
+          rate: '4-7%',
+          amount: `₹${Math.min(reqAmount, Math.max(300000, farmSize * 50000)).toLocaleString()}`,
+          tenure: '12 months (renewable)',
+          bank: 'All Banks',
+          processing: '1-2 weeks',
+          features: ['No collateral up to ₹1.6L', 'Flexible repayment', 'Multi-purpose use']
+        },
+        {
+          name: 'Term Loan for Agriculture',
+          rate: '8-10%',
+          amount: `₹${Math.min(reqAmount, 2000000).toLocaleString()}`,
+          tenure: '3-7 years',
+          bank: 'Nationalized Banks',
+          processing: '2-3 weeks',
+          features: ['Asset creation', 'Longer tenure', 'Competitive rates']
+        },
+        {
+          name: 'Machinery Purchase Loan',
+          rate: '9-12%',
+          amount: `₹${Math.min(reqAmount, 1500000).toLocaleString()}`,
+          tenure: '5-8 years',
+          bank: 'All Banks + NBFCs',
+          processing: '1-3 weeks',
+          features: ['Up to 85% financing', 'Manufacturer tie-ups', 'Insurance linked']
+        }
+      ];
+      
+      // Calculate EMI for average loan amount
+      const avgAmount = reqAmount || 200000;
+      const monthlyRate = 0.08 / 12; // 8% annual rate
+      const tenure = 60; // 5 years
+      emi = Math.round((avgAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1));
+      
+      eligibilityReasons = [
+        'Excellent credit score shows financial discipline',
+        'Strong income-to-expense ratio',
+        'Good farming experience and practices',
+        'Eligible for government interest subvention'
+      ];
+      
+    } else if (score >= 600) {
+      // Good credit - moderate loan options
+      loans = [
+        {
+          name: 'Crop Loan (Seasonal)',
+          rate: '7-9%',
+          amount: `₹${Math.min(reqAmount, Math.max(100000, farmSize * 30000)).toLocaleString()}`,
+          tenure: '6-12 months',
+          bank: 'Cooperative Banks',
+          processing: '1-2 weeks',
+          features: ['Seasonal financing', 'Crop insurance linked', 'Flexible repayment']
+        },
+        {
+          name: 'Input Purchase Loan',
+          rate: '9-11%',
+          amount: `₹${Math.min(reqAmount, 150000).toLocaleString()}`,
+          tenure: '12-18 months',
+          bank: 'Regional Banks',
+          processing: '1-2 weeks',
+          features: ['Seeds, fertilizers, pesticides', 'Quick processing', 'Dealer network']
+        }
+      ];
+      
+      const avgAmount = reqAmount || 100000;
+      const monthlyRate = 0.09 / 12;
+      const tenure = 12;
+      emi = Math.round((avgAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1));
+      
+      eligibilityReasons = [
+        'Good credit score qualifies for standard rates',
+        'Farming experience is valuable',
+        'Consider improving financial ratios for better terms'
+      ];
+      
+    } else if (score >= 500) {
+      // Average credit - limited options
+      loans = [
+        {
+          name: 'Self Help Group (SHG) Loan',
+          rate: '6-8%',
+          amount: `₹${Math.min(reqAmount, 50000).toLocaleString()}`,
+          tenure: '12-24 months',
+          bank: 'Cooperative Banks',
+          processing: '2-3 weeks',
+          features: ['Group guarantee', 'Lower interest', 'Skill development support']
+        },
+        {
+          name: 'Microfinance Loan',
+          rate: '12-18%',
+          amount: `₹${Math.min(reqAmount, 25000).toLocaleString()}`,
+          tenure: '6-18 months',
+          bank: 'MFIs',
+          processing: '1 week',
+          features: ['Quick approval', 'Minimal documentation', 'Doorstep service']
+        }
+      ];
+      
+      const avgAmount = reqAmount || 35000;
+      emi = Math.round(avgAmount / 18); // Simple calculation for short-term loans
+      
+      eligibilityReasons = [
+        'Average credit score limits loan options',
+        'Consider group lending for better rates',
+        'Focus on building credit history'
+      ];
+      
+    } else {
+      // Low credit - improvement tips
+      tips = [
+        'Reduce debt-to-income ratio below 40%',
+        'Maintain detailed farm records and accounts',
+        'Diversify crops to reduce risk and increase income',
+        'Invest in water-efficient irrigation systems',
+        'Join Farmer Producer Organizations (FPOs) for better market access',
+        'Consider organic certification for premium pricing',
+        'Maintain consistent banking transactions',
+        'Clear any existing defaults or overdue amounts',
+        'Start with small loans and build repayment history',
+        'Attend financial literacy programs'
+      ];
+      
+      eligibilityReasons = [
+        'Credit score needs improvement for formal lending',
+        'High risk profile due to financial indicators',
+        'Focus on income generation and expense management'
+      ];
+    }
+
+    setRecommendations({ loans, tips, emi, eligibilityReasons });
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-yellow-50 to-orange-50 p-8"
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-blue-50 to-indigo-50 p-8"
       >
         {/* Background Image */}
         <div className="absolute inset-0 opacity-10">
@@ -27,355 +271,412 @@ const LoanRecommendations = () => {
           />
         </div>
         <div className="relative z-10">
-          <div className="p-4 bg-yellow-100/90 backdrop-blur-sm rounded-3xl w-fit mx-auto mb-4 shadow-lg">
-            <CreditCard className="w-12 h-12 text-yellow-600" />
+          <div className="p-4 bg-blue-100/90 backdrop-blur-sm rounded-3xl w-fit mx-auto mb-4 shadow-lg">
+            <Calculator className="w-12 h-12 text-blue-600" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Agricultural Loan Assistant</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">AI Loan Recommendation + Farm Credit Score</h1>
           <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-            Find the best agricultural loans, government schemes, and financial assistance for your farming needs.
+            Get instant credit score calculation and personalized loan recommendations based on your farm data.
           </p>
         </div>
       </motion.div>
 
-      {/* Credit Score */}
-      <div className="bg-linear-to-r from-yellow-500 to-orange-500 rounded-3xl p-8 text-white shadow-2xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold mb-2">Your Digital Credit Score</h2>
-            <p className="text-yellow-100">Based on farm performance, payment history, and agricultural practices</p>
-          </div>
-          <div className="text-center">
-            <div className="text-6xl font-bold mb-2">{assets.loans.creditScore}</div>
-            <div className="text-yellow-100">Excellent</div>
-          </div>
-        </div>
-        <div className="mt-6 bg-white/20 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span>Credit Utilization</span>
-            <span>Good</span>
-          </div>
-          <div className="bg-white/30 rounded-full h-2">
-            <div className="bg-white h-2 rounded-full" style={{ width: '78%' }}></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Active Loans */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-green-100 shadow-xl">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Active Loans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {assets.loans.active.map((loan, index) => (
-            <div key={index} className="bg-blue-50 rounded-2xl p-6 border border-blue-200">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-blue-800">{loan.type}</h3>
-                <span className="text-2xl font-bold text-blue-600">{loan.amount}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-blue-600">Interest:</span> <span className="font-semibold">{loan.interestRate}</span></div>
-                <div><span className="text-blue-600">Tenure:</span> <span className="font-semibold">{loan.tenure}</span></div>
-                <div><span className="text-blue-600">EMI:</span> <span className="font-semibold">{loan.emi}</span></div>
-                <div><span className="text-blue-600">Outstanding:</span> <span className="font-semibold">{loan.outstanding}</span></div>
-              </div>
-              <div className="mt-4 text-sm text-blue-700">
-                Next Due: <span className="font-semibold">{loan.nextDueDate}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Loan Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Crop Loans */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-green-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
-        >
-          <div className="text-center mb-4">
-            <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-2xl">🌾</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Crop Loans (KCC)</h3>
-            <p className="text-gray-600 text-sm">Short-term credit for crop cultivation</p>
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Interest Rate:</span>
-              <span className="font-semibold text-green-600">7% - 9%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Max Amount:</span>
-              <span className="font-semibold">₹3 Lakh</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Repayment:</span>
-              <span className="font-semibold">After harvest</span>
-            </div>
-          </div>
-          <button className="w-full mt-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors">
-            Apply for KCC
-          </button>
-        </motion.div>
-
-        {/* Equipment Loans */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-blue-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
-        >
-          <div className="text-center mb-4">
-            <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-2xl">🚜</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Equipment Loans</h3>
-            <p className="text-gray-600 text-sm">For tractors, harvesters & farm equipment</p>
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Interest Rate:</span>
-              <span className="font-semibold text-blue-600">8.5% - 12%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Max Amount:</span>
-              <span className="font-semibold">₹25 Lakh</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Tenure:</span>
-              <span className="font-semibold">5-7 years</span>
-            </div>
-          </div>
-          <button className="w-full mt-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
-            Check Eligibility
-          </button>
-        </motion.div>
-
-        {/* Land Development */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-purple-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
-        >
-          <div className="text-center mb-4">
-            <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-2xl">🏡</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Land Development</h3>
-            <p className="text-gray-600 text-sm">For irrigation, land leveling & infrastructure</p>
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Interest Rate:</span>
-              <span className="font-semibold text-purple-600">8% - 11%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Max Amount:</span>
-              <span className="font-semibold">₹10 Lakh</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Tenure:</span>
-              <span className="font-semibold">7-10 years</span>
-            </div>
-          </div>
-          <button className="w-full mt-4 py-2 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors">
-            Get Details
-          </button>
-        </motion.div>
-      </div>
-
-      {/* Government Schemes */}
-      <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 border border-orange-100 shadow-xl">
+      {/* Farm Data Collection Form */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-100 shadow-xl"
+      >
         <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-          <Award className="w-7 h-7 text-orange-600 mr-3" />
-          Government Schemes & Subsidies
+          <User className="w-7 h-7 text-blue-600 mr-3" />
+          Enter Your Farm Details
         </h2>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-orange-50 rounded-2xl p-6">
-            <h3 className="text-lg font-bold text-orange-800 mb-2">PM-KISAN Scheme</h3>
-            <p className="text-orange-700 text-sm mb-3">₹6,000 per year in 3 installments for all farmers</p>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-orange-600">Benefit:</span>
-                <span className="font-semibold">₹2,000 x 3</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-orange-600">Eligibility:</span>
-                <span className="font-semibold">All farmers</span>
-              </div>
-            </div>
-            <button className="w-full mt-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors">
-              Check Status
-            </button>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Farm Size (in acres)
+            </label>
+            <input
+              type="number"
+              placeholder="e.g., 5"
+              value={formData.farmSize}
+              onChange={(e) => handleInputChange('farmSize', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
           </div>
           
-          <div className="bg-green-50 rounded-2xl p-6">
-            <h3 className="text-lg font-bold text-green-800 mb-2">Interest Subvention</h3>
-            <p className="text-green-700 text-sm mb-3">3% interest subvention on crop loans up to ₹3 lakh</p>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-green-600">Effective Rate:</span>
-                <span className="font-semibold">4% (after subvention)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-green-600">Additional:</span>
-                <span className="font-semibold">2% prompt repayment</span>
-              </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Primary Crop Type
+            </label>
+            <select
+              value={formData.cropType}
+              onChange={(e) => handleInputChange('cropType', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
+              <option value="">Select Crop Type</option>
+              <option value="rice">Rice</option>
+              <option value="wheat">Wheat</option>
+              <option value="cotton">Cotton</option>
+              <option value="sugarcane">Sugarcane</option>
+              <option value="maize">Maize</option>
+              <option value="vegetables">Vegetables</option>
+              <option value="fruits">Fruits</option>
+              <option value="pulses">Pulses</option>
+              <option value="oilseeds">Oilseeds</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Last Year's Income (₹)
+            </label>
+            <input
+              type="number"
+              placeholder="e.g., 200000"
+              value={formData.lastYearIncome}
+              onChange={(e) => handleInputChange('lastYearIncome', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Total Expenses (₹)
+            </label>
+            <input
+              type="number"
+              placeholder="e.g., 150000"
+              value={formData.totalExpenses}
+              onChange={(e) => handleInputChange('totalExpenses', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Number of Past Loans
+            </label>
+            <input
+              type="number"
+              placeholder="e.g., 2"
+              value={formData.pastLoans}
+              onChange={(e) => handleInputChange('pastLoans', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              min="0"
+              max="10"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Years of Farming Experience
+            </label>
+            <input
+              type="number"
+              placeholder="e.g., 10"
+              value={formData.experience}
+              onChange={(e) => handleInputChange('experience', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              min="1"
+              max="50"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Irrigation Type
+            </label>
+            <select
+              value={formData.irrigationType}
+              onChange={(e) => handleInputChange('irrigationType', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="rainfed">Rain-fed</option>
+              <option value="canal">Canal Irrigation</option>
+              <option value="borewell">Borewell</option>
+              <option value="drip">Drip Irrigation</option>
+              <option value="sprinkler">Sprinkler</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Land Ownership
+            </label>
+            <select
+              value={formData.landOwnership}
+              onChange={(e) => handleInputChange('landOwnership', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="owned">Own Land</option>
+              <option value="leased">Leased Land</option>
+              <option value="mixed">Own + Leased</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Monthly Household Expenses (₹)
+            </label>
+            <input
+              type="number"
+              placeholder="e.g., 15000"
+              value={formData.householdExpenses}
+              onChange={(e) => handleInputChange('householdExpenses', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Loan Amount Required (₹)
+            </label>
+            <input
+              type="number"
+              placeholder="e.g., 100000"
+              value={formData.loanAmount}
+              onChange={(e) => handleInputChange('loanAmount', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+          
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Any Previous Loan Defaults?
+            </label>
+            <div className="flex space-x-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="defaults"
+                  value="no"
+                  checked={formData.previousDefaults === 'no'}
+                  onChange={(e) => handleInputChange('previousDefaults', e.target.value)}
+                  className="mr-2"
+                />
+                No
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="defaults"
+                  value="yes"
+                  checked={formData.previousDefaults === 'yes'}
+                  onChange={(e) => handleInputChange('previousDefaults', e.target.value)}
+                  className="mr-2"
+                />
+                Yes
+              </label>
             </div>
-            <button className="w-full mt-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors">
-              Learn More
-            </button>
           </div>
         </div>
-      </div>
-
-      {/* Get Personalized Recommendations */}
-      <div className="text-center">
-        <button onClick={getLoanRecommendations} className="px-8 py-4 bg-linear-to-r from-yellow-500 to-orange-500 text-white rounded-2xl font-semibold text-lg hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg">
-          Get Personalized Loan Recommendations
-        </button>
-        <p className="text-gray-600 mt-2 text-sm">Based on your farm size, crop type, and financial profile</p>
-      </div>
-
-      {/* Required Documents */}
-      <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 border border-blue-100 shadow-xl">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Documents Required for Agricultural Loans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-3">
-            <h3 className="font-semibold text-blue-800 mb-3">Identity & Address Proof</h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Aadhaar Card</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Voter ID</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Passport (if available)</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Utility Bills</li>
-            </ul>
-          </div>
-          <div className="space-y-3">
-            <h3 className="font-semibold text-blue-800 mb-3">Land & Agricultural Proof</h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Land Records (7/12, 8A)</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Revenue Records</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Cultivation Certificate</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Patta/Title Deed</li>
-            </ul>
-          </div>
-          <div className="space-y-3">
-            <h3 className="font-semibold text-blue-800 mb-3">Financial Documents</h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Bank Statements (6 months)</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Income Certificate</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Previous Loan Documents</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />PAN Card</li>
-            </ul>
-          </div>
+        
+        <div className="text-center mt-6">
+          <button 
+            onClick={calculateCreditScore}
+            disabled={!formData.farmSize || !formData.lastYearIncome || !formData.totalExpenses || !formData.experience || !formData.householdExpenses || !formData.loanAmount}
+            className="px-8 py-4 bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-2xl font-semibold text-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Calculate Credit Score & Get Recommendations
+          </button>
+          {(!formData.farmSize || !formData.lastYearIncome || !formData.totalExpenses || !formData.experience || !formData.householdExpenses || !formData.loanAmount) && (
+            <p className="text-red-600 text-sm mt-2">Please fill in all required fields</p>
+          )}
         </div>
-      </div>
-
-      {/* Tips for Loan Approval */}
-      <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 border border-green-100 shadow-xl">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Tips to Improve Loan Approval Chances</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-1">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800">Maintain Good Credit History</h3>
-                <p className="text-gray-600 text-sm">Repay existing loans on time and maintain a good credit score</p>
-              </div>
+      </motion.div>      {/* Credit Score Results */}
+      {creditScore && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-100 shadow-xl"
+        >
+          <div className={`text-center p-8 rounded-3xl ${getCreditRating(creditScore).bg} border-2 border-gray-200`}>
+            <div className="text-6xl font-bold text-gray-800 mb-2">{creditScore}</div>
+            <div className={`text-xl font-semibold ${getCreditRating(creditScore).color} mb-2`}>
+              {getCreditRating(creditScore).rating}
             </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-1">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800">Keep Land Records Updated</h3>
-                <p className="text-gray-600 text-sm">Ensure all land documents are current and in your name</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-1">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800">Show Consistent Income</h3>
-                <p className="text-gray-600 text-sm">Maintain bank statements showing regular agricultural income</p>
-              </div>
-            </div>
+            <p className="text-gray-600">Your Farm Credit Score</p>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 mt-1">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800">Demonstrate Farm Profitability</h3>
-                <p className="text-gray-600 text-sm">Show crop yield records and market sale receipts</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 mt-1">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800">Apply Through Cooperative Banks</h3>
-                <p className="text-gray-600 text-sm">Often have better rates and easier approval for farmers</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0 mt-1">
-                <Award className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-800">Join Farmer Producer Organizations</h3>
-                <p className="text-gray-600 text-sm">FPO membership can help with loan guarantees and better rates</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Loan Recommendations */}
-      {recommendations && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recommendations.map((loan, index) => (
-            <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
-              className="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-green-200 shadow-xl">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-800">{loan.bank}</h3>
-                <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                  {loan.approvalProbability}% Approval
+          {/* Recommended Loans or Tips */}
+          <div className="mt-8">
+            {recommendations?.loans?.length > 0 ? (
+              <>
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                  🎉 Congratulations! You're eligible for these loans:
+                </h3>
+                <div className="space-y-4">
+                  {recommendations.loans.map((loan, index) => (
+                    <div key={index} className="bg-linear-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 hover:shadow-lg transition-all">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xl font-bold text-green-800">{loan.name}</h4>
+                        <span className="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm font-semibold">
+                          {loan.rate}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                        <div>
+                          <span className="text-green-600 font-medium">Amount:</span>
+                          <div className="font-bold text-green-800 text-lg">{loan.amount}</div>
+                        </div>
+                        <div>
+                          <span className="text-green-600 font-medium">Rate:</span>
+                          <div className="font-bold text-green-800">{loan.rate}</div>
+                        </div>
+                        <div>
+                          <span className="text-green-600 font-medium">Tenure:</span>
+                          <div className="font-bold text-green-800">{loan.tenure}</div>
+                        </div>
+                        <div>
+                          <span className="text-green-600 font-medium">Processing:</span>
+                          <div className="font-bold text-green-800">{loan.processing}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <span className="text-green-600 font-medium text-sm">Available at:</span>
+                        <div className="font-semibold text-green-800">{loan.bank}</div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <span className="text-green-600 font-medium text-sm">Key Features:</span>
+                        <ul className="mt-1 space-y-1">
+                          {loan.features.map((feature, idx) => (
+                            <li key={idx} className="text-green-700 text-sm flex items-center">
+                              <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <button className="w-full py-3 bg-linear-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all shadow-md">
+                        Apply for {loan.name}
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Loan Type:</span>
-                  <span className="font-semibold">{loan.type}</span>
+                
+                {recommendations.emi > 0 && (
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="text-center p-6 bg-blue-50 rounded-2xl">
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <IndianRupee className="w-6 h-6 text-blue-600" />
+                      <span className="text-2xl font-bold text-blue-800">₹{recommendations.emi.toLocaleString()}/month</span>
+                    </div>
+                    <p className="text-blue-600">Estimated EMI for average loan</p>
+                  </div>
+                  
+                  <div className="p-6 bg-indigo-50 rounded-2xl">
+                    <h4 className="font-bold text-indigo-800 mb-3">Why You Qualify:</h4>
+                    <ul className="space-y-2">
+                      {recommendations.eligibilityReasons?.map((reason, idx) => (
+                        <li key={idx} className="text-indigo-700 text-sm flex items-start">
+                          <CheckCircle className="w-4 h-4 text-indigo-500 mr-2 mt-0.5 shrink-0" />
+                          {reason}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Max Amount:</span>
-                  <span className="font-semibold text-green-600">{loan.maxAmount}</span>
+                )}
+              </>
+            ) : (
+              <>
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                  💡 Tips to Improve Your Credit Score
+                </h3>
+                <div className="space-y-3">
+                  {recommendations?.tips?.map((tip, index) => (
+                    <div key={index} className="flex items-start space-x-3 bg-yellow-50 rounded-2xl p-4">
+                      <div className="w-6 h-6 bg-yellow-200 rounded-full flex items-center justify-center shrink-0 mt-1">
+                        <span className="text-yellow-800 font-bold text-sm">{index + 1}</span>
+                      </div>
+                      <p className="text-yellow-800 font-medium">{tip}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Interest Rate:</span>
-                  <span className="font-semibold">{loan.interestRate}</span>
+                
+                <div className="mt-6 text-center p-6 bg-orange-50 rounded-2xl">
+                  <p className="text-orange-800 font-semibold">
+                    💪 Work on these areas and check your score again in 3-6 months!
+                  </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Processing:</span>
-                  <span className="font-semibold">{loan.processing}</span>
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <button className="w-full py-3 bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-semibold hover:from-green-600 hover:to-emerald-600 transition-all">
-                  Apply Now
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </>
+            )}
+          </div>
+        </motion.div>
       )}
+      
+      {/* Disclaimer and Next Steps */}
+      <div className="bg-gray-50 rounded-3xl p-8 border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-800 mb-4">📋 Next Steps & Important Information</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-3">How to Apply:</h4>
+            <ol className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start">
+                <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5">1</span>
+                Visit your nearest bank branch with documents
+              </li>
+              <li className="flex items-start">
+                <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5">2</span>
+                Fill out the loan application form
+              </li>
+              <li className="flex items-start">
+                <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5">3</span>
+                Submit required documents for verification
+              </li>
+              <li className="flex items-start">
+                <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5">4</span>
+                Wait for credit appraisal and approval
+              </li>
+            </ol>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-3">💡 Pro Tips:</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5" />
+                Apply during the sowing season for faster approval
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5" />
+                Maintain regular banking transactions
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5" />
+                Get crop insurance for better loan terms
+              </li>
+              <li className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5" />
+                Consider multiple banks for best rates
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="mt-6 p-4 bg-yellow-50 rounded-2xl border-l-4 border-yellow-400">
+          <p className="text-sm text-yellow-800">
+            <strong>Disclaimer:</strong> This is an indicative credit score and loan recommendations. 
+            Actual loan approval depends on bank's credit policy, documentation, and other factors. 
+            Interest rates are subject to change and may vary by bank and borrower profile.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
