@@ -17,13 +17,15 @@ const Dashboard = () => {
 
   const stats = [
     {
-      title: 'Total Farm Revenue',
-      value: '₹8,95,000',
+      title: 'Total Revenue',
+      value: '₹8.95L',
       change: '+12.5%',
       trend: 'up',
       icon: DollarSign,
-      color: 'emerald',
-      description: 'Current season earnings'
+      color: 'from-emerald-500 to-teal-500',
+      bgColor: 'bg-emerald-50',
+      textColor: 'text-emerald-600',
+      description: 'This season earnings'
     },
     {
       title: 'Active Crops',
@@ -31,7 +33,9 @@ const Dashboard = () => {
       change: '+1',
       trend: 'up',
       icon: Sprout,
-      color: 'green',
+      color: 'from-green-500 to-lime-500',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-600',
       description: 'Cotton, Wheat, Tomato'
     },
     {
@@ -40,12 +44,14 @@ const Dashboard = () => {
       change: '-5%',
       trend: 'down',
       icon: Cloud,
-      color: 'blue',
-      description: 'Favorable for farming'
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-600',
+      description: 'Favorable conditions'
     },
     {
-      title: 'Profit Margin',
-      value: '42%',
+      title: 'Efficiency',
+      value: '92%',
       change: '+8.3%',
       trend: 'up',
       icon: TrendingUp,
@@ -77,9 +83,17 @@ const Dashboard = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-linear-to-r from-green-500 to-emerald-600 rounded-3xl p-8 text-white shadow-2xl"
+        className="bg-linear-to-r from-green-500 to-emerald-600 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden"
       >
-        <div className="flex items-center justify-between">
+        {/* Background Image */}
+        <div className="absolute right-0 top-0 w-64 h-full opacity-20">
+          <img 
+            src="/src/assets/pexels-pixabay-259280.jpg" 
+            alt="Farm background" 
+            className="w-full h-full object-cover rounded-r-3xl"
+          />
+        </div>
+        <div className="relative z-10 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
               Welcome back, {assets.farmProfile.name}! 🌾
@@ -157,7 +171,7 @@ const Dashboard = () => {
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-6 rounded-3xl border-2 border-${action.color}-200 hover:border-${action.color}-400 transition-all duration-300 group bg-gradient-to-br from-${action.color}-50 to-${action.color}-100`}
+                className={`p-6 rounded-3xl border-2 border-${action.color}-200 hover:border-${action.color}-400 transition-all duration-300 group bg-linear-to-br from-${action.color}-50 to-${action.color}-100`}
               >
                 <Icon className={`w-8 h-8 text-${action.color}-600 mx-auto mb-3 group-hover:scale-110 transition-transform`} />
                 <p className="text-sm font-semibold text-gray-700">{action.title}</p>

@@ -25,14 +25,28 @@ const EcommercePlatform = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-        <div className="p-4 bg-emerald-100 rounded-3xl w-fit mx-auto mb-4">
-          <ShoppingCart className="w-12 h-12 text-emerald-600" />
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-emerald-50 to-teal-50 p-8"
+      >
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-20">
+          <img 
+            src="/src/assets/pexels-nc-farm-bureau-mark-2749165.jpg" 
+            alt="Agricultural products" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">AgriCommerce Platform</h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Browse and purchase high-quality seeds, fertilizers, pesticides, and farming tools at competitive prices.
-        </p>
+        <div className="relative z-10">
+          <div className="p-4 bg-emerald-100/90 backdrop-blur-sm rounded-3xl w-fit mx-auto mb-4 shadow-lg">
+            <ShoppingCart className="w-12 h-12 text-emerald-600" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">AgriCommerce Platform</h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Browse and purchase high-quality seeds, fertilizers, pesticides, and farming tools at competitive prices.
+          </p>
+        </div>
       </motion.div>
 
       {/* Search and Cart */}

@@ -84,20 +84,30 @@ const DiseaseDetection = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center"
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-red-50 to-pink-50 p-8"
       >
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-4 bg-red-100 rounded-3xl">
-            <Activity className="w-12 h-12 text-red-600" />
-          </div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-15">
+          <img 
+            src="/src/assets/pexels-pixabay-259280.jpg" 
+            alt="Crop monitoring" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          AI Crop Disease Detection
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Upload an image of your crop to get instant AI-powered disease analysis, 
-          treatment recommendations, and prevention strategies.
-        </p>
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-4 bg-red-100/90 backdrop-blur-sm rounded-3xl shadow-lg">
+              <Activity className="w-12 h-12 text-red-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            AI Crop Disease Detection
+          </h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Upload an image of your crop to get instant AI-powered disease analysis, 
+            treatment recommendations, and prevention strategies.
+          </p>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

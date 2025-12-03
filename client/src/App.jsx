@@ -39,12 +39,12 @@ function Layout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-linear-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="flex h-screen bg-linear-to-br from-slate-50 via-gray-50 to-zinc-50 overflow-hidden">
       {/* Sidebar */}
       <motion.div
-        animate={{ x: sidebarOpen ? 0 : -300 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="fixed left-0 top-0 h-full z-40 lg:relative lg:translate-x-0 lg:transform-none"
+        animate={{ x: sidebarOpen ? 0 : -288 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="fixed left-0 top-0 h-full z-40 lg:relative lg:translate-x-0 lg:transform-none w-72 shrink-0"
       >
         <Sidebar 
           setSidebarOpen={setSidebarOpen}
@@ -52,21 +52,23 @@ function Layout() {
       </motion.div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 bg-white/50 backdrop-blur-sm">
         {/* Top Navbar */}
-        <Navbar 
-          sidebarOpen={sidebarOpen} 
-          setSidebarOpen={setSidebarOpen} 
-        />
+        <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30">
+          <Navbar 
+            sidebarOpen={sidebarOpen} 
+            setSidebarOpen={setSidebarOpen} 
+          />
+        </div>
 
         {/* Main Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="container mx-auto px-6 py-8">
+          <div className="max-w-full px-4 sm:px-6 lg:px-8 py-6">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
               <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -93,10 +95,14 @@ function Layout() {
       </div>
 
       {/* Mobile sidebar overlay */}
-      <div 
-        className={`fixed inset-0 z-30 lg:hidden bg-black transition-opacity duration-300 ${
-          sidebarOpen ? 'bg-opacity-50 pointer-events-auto' : 'bg-opacity-0 pointer-events-none'
-        }`}
+      <motion.div 
+        initial={false}
+        animate={{ 
+          opacity: sidebarOpen ? 0.5 : 0,
+          pointerEvents: sidebarOpen ? 'auto' : 'none'
+        }}
+        transition={{ duration: 0.3 }}
+        className="fixed inset-0 z-30 lg:hidden bg-black backdrop-blur-sm"
         onClick={() => setSidebarOpen(false)}
       />
     </div>

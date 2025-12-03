@@ -57,20 +57,30 @@ const WeatherForecast = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center"
+        className="text-center relative"
       >
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-4 bg-blue-100 rounded-3xl">
-            <Cloud className="w-12 h-12 text-blue-600" />
-          </div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-10 rounded-3xl overflow-hidden">
+          <img 
+            src="/src/assets/pexels-pixabay-33044.jpg" 
+            alt="Agricultural landscape" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Weather Forecast & Farming Advice
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Get real-time weather updates and AI-powered farming recommendations
-          for optimal crop management decisions.
-        </p>
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-4 bg-blue-100 rounded-3xl shadow-lg">
+              <Cloud className="w-12 h-12 text-blue-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            Weather Forecast & Farming Advice
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Get real-time weather updates and AI-powered farming recommendations
+            for optimal crop management decisions.
+          </p>
+        </div>
       </motion.div>
 
       {/* Current Weather Card */}

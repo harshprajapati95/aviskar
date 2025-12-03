@@ -33,20 +33,30 @@ const CropRecommendation = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center"
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-green-50 to-emerald-50 p-8"
       >
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-4 bg-green-100 rounded-3xl">
-            <Sprout className="w-12 h-12 text-green-600" />
-          </div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-15">
+          <img 
+            src="/src/assets/pexels-nc-farm-bureau-mark-2749165.jpg" 
+            alt="Crop farming" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Smart Crop Recommendation
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Get AI-powered crop suggestions based on your soil, climate, and market conditions
-          to maximize profitability and minimize risks.
-        </p>
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-4 bg-green-100/90 backdrop-blur-sm rounded-3xl shadow-lg">
+              <Sprout className="w-12 h-12 text-green-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            Smart Crop Recommendation
+          </h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Get AI-powered crop suggestions based on your soil, climate, and market conditions
+            to maximize profitability and minimize risks.
+          </p>
+        </div>
       </motion.div>
 
       {/* Season Selection */}

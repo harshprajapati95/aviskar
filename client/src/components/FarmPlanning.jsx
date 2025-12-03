@@ -14,14 +14,28 @@ const FarmPlanning = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-        <div className="p-4 bg-lime-100 rounded-3xl w-fit mx-auto mb-4">
-          <Calendar className="w-12 h-12 text-lime-600" />
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-lime-50 to-green-50 p-8"
+      >
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-20">
+          <img 
+            src="/src/assets/pexels-nc-farm-bureau-mark-2749165.jpg" 
+            alt="Farm planning" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">AI Farm Planning Calendar</h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Get AI-generated farming schedules optimized for weather, crop stages, and seasonal requirements.
-        </p>
+        <div className="relative z-10">
+          <div className="p-4 bg-lime-100/90 backdrop-blur-sm rounded-3xl w-fit mx-auto mb-4 shadow-lg">
+            <Calendar className="w-12 h-12 text-lime-600" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">AI Farm Planning Calendar</h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Get AI-generated farming schedules optimized for weather, crop stages, and seasonal requirements.
+          </p>
+        </div>
       </motion.div>
 
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-green-100 shadow-xl">
@@ -43,8 +57,22 @@ const FarmPlanning = () => {
         {farmPlan && (
           <div className="space-y-4">
             {farmPlan.map((activity, index) => (
-              <motion.div key={index} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}
-                className="bg-lime-50 rounded-2xl p-6 border border-lime-200">
+              <motion.div 
+                key={index} 
+                initial={{ opacity: 0, x: -20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                transition={{ delay: index * 0.1 }}
+                className="bg-lime-50 rounded-2xl p-6 border border-lime-200 relative overflow-hidden group hover:shadow-lg transition-all"
+              >
+                {/* Subtle background accent */}
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <img 
+                    src="/src/assets/pexels-pixabay-259280.jpg" 
+                    alt="Farm activity" 
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-xl ${
@@ -77,6 +105,7 @@ const FarmPlanning = () => {
                     <span>Weather dependent activity - Monitor forecast</span>
                   </div>
                 )}
+                </div>
               </motion.div>
             ))}
           </div>

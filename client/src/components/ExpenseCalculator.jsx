@@ -35,20 +35,30 @@ const ExpenseCalculator = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center"
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-indigo-50 to-blue-50 p-8"
       >
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-4 bg-indigo-100 rounded-3xl">
-            <Calculator className="w-12 h-12 text-indigo-600" />
-          </div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-10">
+          <img 
+            src="/src/assets/pexels-pixabay-33044.jpg" 
+            alt="Financial planning" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Expense & Profit Calculator
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Track your farming expenses, analyze profitability, and make informed
-          financial decisions for your agricultural operations.
-        </p>
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-4 bg-indigo-100/90 backdrop-blur-sm rounded-3xl shadow-lg">
+              <Calculator className="w-12 h-12 text-indigo-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            Expense & Profit Calculator
+          </h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Track your farming expenses, analyze profitability, and make informed
+            financial decisions for your agricultural operations.
+          </p>
+        </div>
       </motion.div>
 
       {/* Key Metrics */}
@@ -104,7 +114,7 @@ const ExpenseCalculator = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex space-x-2 bg-white/80 backdrop-blur-xl rounded-2xl p-2"
+        className="flex space-x-2 bg-white/90 backdrop-blur-xl rounded-3xl p-2 border border-gray-100 shadow-lg"
       >
         {[
           { id: 'overview', label: 'Overview', icon: PieChart },
@@ -114,16 +124,72 @@ const ExpenseCalculator = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center space-x-2 px-6 py-4 rounded-2xl transition-all duration-300 font-medium ${
               activeTab === tab.id
-                ? 'bg-green-500 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-green-50'
+                ? 'bg-linear-to-r from-indigo-500 to-blue-500 text-white shadow-lg transform scale-105'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
             }`}
           >
             <tab.icon className="w-5 h-5" />
-            <span className="font-medium">{tab.label}</span>
+            <span>{tab.label}</span>
           </button>
         ))}
+      </motion.div>
+
+      {/* Quick Actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
+      >
+        <button className="bg-white/90 backdrop-blur-xl rounded-2xl p-4 border border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors">
+              <Plus className="w-5 h-5 text-green-600" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-800">Add Expense</p>
+              <p className="text-sm text-gray-600">Record new cost</p>
+            </div>
+          </div>
+        </button>
+        
+        <button className="bg-white/90 backdrop-blur-xl rounded-2xl p-4 border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
+              <TrendingUp className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-800">Add Income</p>
+              <p className="text-sm text-gray-600">Record revenue</p>
+            </div>
+          </div>
+        </button>
+        
+        <button className="bg-white/90 backdrop-blur-xl rounded-2xl p-4 border border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-800">Generate Report</p>
+              <p className="text-sm text-gray-600">Export data</p>
+            </div>
+          </div>
+        </button>
+        
+        <button className="bg-white/90 backdrop-blur-xl rounded-2xl p-4 border border-orange-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-orange-100 rounded-xl group-hover:bg-orange-200 transition-colors">
+              <Target className="w-5 h-5 text-orange-600" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-800">Set Budget</p>
+              <p className="text-sm text-gray-600">Plan spending</p>
+            </div>
+          </div>
+        </button>
       </motion.div>
 
       {/* Tab Content */}

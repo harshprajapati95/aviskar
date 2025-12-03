@@ -44,26 +44,36 @@ const Chatbot = () => {
         className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden h-[600px] flex flex-col"
       >
         {/* Header */}
-        <div className="bg-linear-to-r from-pink-500 to-purple-600 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Bot className="w-6 h-6" />
+        <div className="bg-linear-to-r from-pink-500 to-purple-600 p-6 text-white relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute right-0 top-0 w-32 h-32 opacity-20">
+            <img 
+              src="/src/assets/pexels-pixabay-33044.jpg" 
+              alt="Farm pattern" 
+              className="w-full h-full object-cover rounded-full"
+            />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+                  <Bot className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">AI Farming Assistant</h2>
+                  <p className="text-pink-100">Multilingual Support • Always Available</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold">AI Farming Assistant</h2>
-                <p className="text-pink-100">Multilingual Support • Always Available</p>
-              </div>
+              <select 
+                value={language} 
+                onChange={(e) => setLanguage(e.target.value)}
+                className="bg-white/20 text-white rounded-xl px-3 py-2 text-sm"
+              >
+                {Object.entries(assets.chatbot.languages).map(([code, name]) => (
+                  <option key={code} value={code} className="text-gray-800">{name}</option>
+                ))}
+              </select>
             </div>
-            <select 
-              value={language} 
-              onChange={(e) => setLanguage(e.target.value)}
-              className="bg-white/20 text-white rounded-xl px-3 py-2 text-sm"
-            >
-              {Object.entries(assets.chatbot.languages).map(([code, name]) => (
-                <option key={code} value={code} className="text-gray-800">{name}</option>
-              ))}
-            </select>
           </div>
         </div>
 

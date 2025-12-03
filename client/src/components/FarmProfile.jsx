@@ -16,49 +16,68 @@ const FarmProfile = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center"
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-emerald-50 to-teal-50 p-8"
       >
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-4 bg-purple-100 rounded-3xl">
-            <User className="w-12 h-12 text-purple-600" />
-          </div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-20">
+          <img 
+            src="/src/assets/pexels-carl-wyatt-654792-2237485.jpg" 
+            alt="Farm landscape" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Farm Profile Management
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Manage your farm information, track historical data, and optimize
-          your agricultural operations with detailed insights.
-        </p>
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-4 bg-purple-100/90 backdrop-blur-sm rounded-3xl shadow-lg">
+              <User className="w-12 h-12 text-purple-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            Farm Profile Management
+          </h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Manage your farm information, track historical data, and optimize
+            your agricultural operations with detailed insights.
+          </p>
+        </div>
       </motion.div>
 
       {/* Profile Overview */}
-      <div className="bg-linear-to-r from-green-500 to-emerald-600 rounded-3xl p-8 text-white shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8" />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold">{profile.name}</h2>
-              <p className="text-green-100">Farmer ID: {profile.farmerId}</p>
-              <div className="flex items-center space-x-2 mt-2">
-                <MapPin className="w-4 h-4" />
-                <span className="text-green-100">{profile.location}</span>
+      <div className="bg-linear-to-r from-green-500 to-emerald-600 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+        {/* Subtle background pattern */}
+        <div className="absolute right-0 top-0 w-48 h-48 opacity-10">
+          <img 
+            src="/src/assets/pexels-pixabay-259280.jpg" 
+            alt="Farm pattern" 
+            className="w-full h-full object-cover rounded-full"
+          />
+        </div>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">{profile.name}</h2>
+                <p className="text-green-100">Farmer ID: {profile.farmerId}</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <MapPin className="w-4 h-4" />
+                  <span className="text-green-100">{profile.location}</span>
+                </div>
               </div>
             </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsEditing(!isEditing)}
+              className="bg-white/20 hover:bg-white/30 rounded-2xl p-3 transition-colors"
+            >
+              <Edit3 className="w-5 h-5" />
+            </motion.button>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsEditing(!isEditing)}
-            className="bg-white/20 hover:bg-white/30 rounded-2xl p-3 transition-colors"
-          >
-            <Edit3 className="w-5 h-5" />
-          </motion.button>
-        </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="text-center">
             <div className="text-3xl font-bold">{profile.farmSize}</div>
             <div className="text-green-100">Acres</div>
@@ -74,6 +93,7 @@ const FarmProfile = () => {
           <div className="text-center">
             <div className="text-3xl font-bold">{profile.certifications.length}</div>
             <div className="text-green-100">Certifications</div>
+          </div>
           </div>
         </div>
       </div>

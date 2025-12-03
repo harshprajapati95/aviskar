@@ -8,14 +8,28 @@ const GovernmentSchemes = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-        <div className="p-4 bg-rose-100 rounded-3xl w-fit mx-auto mb-4">
-          <Award className="w-12 h-12 text-rose-600" />
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-rose-50 to-pink-50 p-8"
+      >
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-15">
+          <img 
+            src="/src/assets/pexels-carl-wyatt-654792-2237485.jpg" 
+            alt="Government agricultural schemes" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">Government Schemes & Subsidies</h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Discover and apply for government schemes, subsidies, and benefits tailored for your farm.
-        </p>
+        <div className="relative z-10">
+          <div className="p-4 bg-rose-100/90 backdrop-blur-sm rounded-3xl w-fit mx-auto mb-4 shadow-lg">
+            <Award className="w-12 h-12 text-rose-600" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Government Schemes & Subsidies</h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Discover and apply for government schemes, subsidies, and benefits tailored for your farm.
+          </p>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -25,10 +39,21 @@ const GovernmentSchemes = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-green-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
-            onClick={() => setSelectedScheme(scheme)}
+            className="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-green-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer relative overflow-hidden group"
           >
-            <div className="flex items-center justify-between mb-4">
+            {/* Subtle background pattern */}
+            <div className="absolute top-0 right-0 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity">
+              <img 
+                src="/src/assets/pexels-pixabay-33044.jpg" 
+                alt="Pattern" 
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            <div 
+              className="relative z-10"
+              onClick={() => setSelectedScheme(scheme)}
+            >
+              <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-800">{scheme.name}</h3>
               <div className={`p-2 rounded-xl ${
                 scheme.status === 'Eligible' ? 'bg-green-100' :
@@ -60,6 +85,7 @@ const GovernmentSchemes = () => {
               }`}>
                 {scheme.status}
               </div>
+            </div>
             </div>
           </motion.div>
         ))}

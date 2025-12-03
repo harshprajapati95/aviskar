@@ -31,34 +31,34 @@ const Sidebar = ({ setSidebarOpen }) => {
   ];
 
   return (
-    <div className="w-72 h-full bg-white/80 backdrop-blur-xl border-r border-green-200 shadow-2xl">
+    <div className="w-72 h-full bg-white/95 backdrop-blur-xl border-r border-gray-200/50 shadow-xl flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-green-100">
+      <div className="flex items-center justify-between p-6 border-b border-gray-100/50 shrink-0">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center space-x-3"
         >
-          <div className="w-10 h-10 bg-linear-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="w-11 h-11 bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
             <Sprout className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-linear-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-gray-800">
               KrishiMitra
             </h1>
-            <p className="text-xs text-green-600/80">Smart Agriculture AI</p>
+            <p className="text-xs text-gray-500 font-medium">Smart Agriculture AI</p>
           </div>
         </motion.div>
         <button
           onClick={() => setSidebarOpen(false)}
-          className="lg:hidden p-2 rounded-xl hover:bg-green-100 transition-colors"
+          className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
         >
-          <X className="w-5 h-5 text-green-600" />
+          <X className="w-5 h-5 text-gray-600" />
         </button>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto min-h-0">
         {menuItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -68,7 +68,7 @@ const Sidebar = ({ setSidebarOpen }) => {
               key={item.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: index * 0.03 }}
             >
               <Link
                 to={item.path}
@@ -79,23 +79,23 @@ const Sidebar = ({ setSidebarOpen }) => {
                   }
                 }}
                 className={`
-                  w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 group
+                  w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 group relative
                   ${isActive 
-                    ? 'bg-linear-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/25 scale-105' 
-                    : 'text-green-700 hover:bg-green-50 hover:scale-105 hover:shadow-md'
+                    ? 'bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-md' 
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }
                 `}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : item.color} transition-colors`} />
-                <span className={`font-medium text-sm ${isActive ? 'text-white' : 'text-green-800'}`}>
+                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : item.color} transition-colors group-hover:scale-105`} />
+                <span className={`font-medium text-sm ${isActive ? 'text-white' : 'text-gray-700'} group-hover:font-semibold`}>
                   {item.label}
                 </span>
                 {isActive && (
                   <motion.div
-                    layoutId="activeTab"
-                    className="ml-auto w-2 h-2 bg-white rounded-full"
+                    layoutId="activeIndicator"
+                    className="absolute right-2 w-2 h-2 bg-white rounded-full"
                     initial={false}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   />
                 )}
               </Link>
@@ -105,24 +105,26 @@ const Sidebar = ({ setSidebarOpen }) => {
       </nav>
 
       {/* Footer */}
-      <div className="p-6 border-t border-green-100">
-        <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-2xl p-4">
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+      <div className="p-4 border-t border-gray-100/50 shrink-0">
+        <div className="bg-linear-to-r from-gray-50 to-slate-50 rounded-xl p-4 border border-gray-100/50">
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="w-9 h-9 bg-linear-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shadow-sm">
               <User className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <h4 className="font-semibold text-green-800 text-sm">Rajesh Kumar</h4>
-              <p className="text-xs text-green-600">Premium Farmer</p>
+            <div className="min-w-0 flex-1">
+              <h4 className="font-semibold text-gray-800 text-sm truncate">Rajesh Kumar</h4>
+              <p className="text-xs text-gray-500 font-medium">Premium Farmer</p>
             </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <div className="flex-1 bg-green-200 rounded-full h-2">
-              <div className="bg-green-500 h-2 rounded-full" style={{ width: '75%' }}></div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-600">Profile Completion</span>
+              <span className="font-semibold text-gray-800">75%</span>
             </div>
-            <span className="text-xs text-green-600 font-medium">75%</span>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div className="bg-linear-to-r from-emerald-500 to-teal-500 h-1.5 rounded-full transition-all duration-300" style={{ width: '75%' }}></div>
+            </div>
           </div>
-          <p className="text-xs text-green-600 mt-1">Profile Completion</p>
         </div>
       </div>
     </div>

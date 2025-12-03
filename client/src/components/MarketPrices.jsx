@@ -21,20 +21,30 @@ const MarketPrices = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center"
+        className="text-center relative overflow-hidden rounded-3xl bg-linear-to-r from-orange-50 to-amber-50 p-8"
       >
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-4 bg-orange-100 rounded-3xl">
-            <TrendingUp className="w-12 h-12 text-orange-600" />
-          </div>
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-15">
+          <img 
+            src="/src/assets/pexels-pixabay-33044.jpg" 
+            alt="Agricultural market" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Market Prices & Trends
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Real-time market prices, future predictions, and optimal selling strategies
-          to maximize your crop returns.
-        </p>
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-4 bg-orange-100/90 backdrop-blur-sm rounded-3xl shadow-lg">
+              <TrendingUp className="w-12 h-12 text-orange-600" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            Market Prices & Trends
+          </h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Real-time market prices, future predictions, and optimal selling strategies
+            to maximize your crop returns.
+          </p>
+        </div>
       </motion.div>
 
       {/* Today's Prices */}
@@ -91,7 +101,7 @@ const MarketPrices = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-8 text-white shadow-2xl"
+          className="bg-linear-to-br from-blue-500 to-purple-600 rounded-3xl p-8 text-white shadow-2xl"
         >
           <h2 className="text-2xl font-bold mb-6 flex items-center">
             <BarChart3 className="w-7 h-7 mr-3" />
